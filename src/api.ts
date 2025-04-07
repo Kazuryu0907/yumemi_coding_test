@@ -35,7 +35,7 @@ export async function fetch_prefectures(){
     });
     const text = await res.text();
     const json:PrefecturesResponse = JSON.parse(text);
-    console.log(json.result);
+    return json;
 }
 
 export async function fetch_population(prefCode: number){
