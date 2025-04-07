@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { fetch_prefectures,Prefecture } from "./api";
+import { useEffect, useRef, useState } from "react";
+import { fetch_population, fetch_prefectures,Prefecture } from "./api";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
 /**
  * 単一のCheckboxコンポーネント
  * @property {Prefecture} pref 表示させるチェックボックスに対応するPrefecture
@@ -34,8 +36,9 @@ function Checkbox(pref:Prefecture, onChange:React.ChangeEventHandler<HTMLInputEl
 function create_checkbox_onChange(pref:Prefecture,set_checked_prefecture_ids:React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>){
     const onChange:React.ChangeEventHandler<HTMLInputElement> = (e) => {
         set_checked_prefecture_ids((prev) => {
-            prev[pref.prefCode] = e.target.checked;
-            return {...prev};
+            prev.set(pref,e.target.checked);
+            // 新しいObjectにしてState更新させる
+            return new Map(prev);
         }
         );
     }
@@ -62,7 +65,7 @@ function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:Rea
 
     const split_check_boxes = split_prefectures.map((check_boxes,i) => {
         return(
-            <div key={`checkbox-group-${i}`} onChange={() => console.log("changed")}>
+            <div key={`checkbox-group-${i}`}>
                 <div className="flex">
                     {check_boxes.map(pref => {
                         return(
@@ -82,30 +85,63 @@ function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:Rea
     )
 }
 
-type checked_prefecture_ids_type = Record<number,boolean>;
+// * RecordからMapに変更
+type checked_prefecture_ids_type = Map<Prefecture,boolean>;
 function Yumemi(){
     const [prefectures,set_prefectures] = useState<Prefecture[]>([]);
-    const [checked_prefecture_ids,set_checked_prefecture_ids] = useState<checked_prefecture_ids_type>({});
+    const [checked_prefecture_ids,set_checked_prefecture_ids] = useState<checked_prefecture_ids_type>(new Map());
     // 初回のみ実行
     useEffect(() => {
         // ゆめみのAPIを叩き，prefecture一覧取得
         fetch_prefectures().then(json => {
             // Stateのprefecture更新
             set_prefectures(json.result);
-            const checked_pref_ids:checked_prefecture_ids_type = {};
+            const checked_pref_ids:checked_prefecture_ids_type = new Map();
             // Stateのchecked_prefecture_ids更新
             json.result.map((pref) => {
-                checked_pref_ids[pref.prefCode] = false;
+                checked_pref_ids.set(pref,false);
             });
+            console.log(checked_pref_ids);
             set_checked_prefecture_ids(checked_pref_ids);
         });
     },[]);
+
+    // checkboxが更新された時発火
+    useEffect(() => {
+        const checked_prefectures:Prefecture[] = [];
+        for(const [pref,is_checked] of checked_prefecture_ids){
+            if(is_checked === true)checked_prefectures.push(pref);
+        }
+        if(checked_prefectures.length === 0)return;
+        fetch_population(checked_prefectures[0].prefCode).then(json => {
+            console.log(json.result);
+            // ここのデータをGraph.tsxに流す
+        });
+    },[checked_prefecture_ids]);
+
+    const chartComponentRef = useRef<HighchartsReact.RefObject>(null);
+    const options: Highcharts.Options = {
+        title: {
+            text: "テストだよ"
+        },
+        series: [
+            {
+                type: "line",
+                data: [1,2,3]
+            }
+        ]
+    };
     return(
         <div className="mt-10 px-16">
             <div>
                 <a className="border border-black">都道府県</a>
             </div>
             {AlignedCheckbox(prefectures,set_checked_prefecture_ids)}
+            <HighchartsReact
+                highcharts={Highcharts}
+                options={options}
+                ref={chartComponentRef}
+            />
         </div>
     )
 }
