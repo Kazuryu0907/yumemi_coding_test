@@ -1,33 +1,42 @@
-export type Prefecture = {
-    prefCode: number,
-    prefName: string
-};
+import * as z from "zod";
 
-export type PrefecturesResponse = {
-    message: string,
-    result: Prefecture[]
-};
+const PrefectureSchema = z.object({
+    prefCode: z.number(),
+    prefName: z.string()
+});
+
+export type Prefecture = z.infer<typeof PrefectureSchema>;
+
+const PrefectureResponseSchema = z.object({
+    message: z.string(),
+    result: z.array(PrefectureSchema)
+});
+export type PrefecturesResponse = z.infer<typeof PrefectureResponseSchema>;
 
 
 export const ALL_LABELS = ["総人口","年少人口","生産年齢人口","老年人口"] as const;
 export type label_tuple = typeof ALL_LABELS;
 export type label_type = label_tuple[number];
-export type PopulationCompositionPerYear = {
-    boundaryYear: number,
-    data: {
-        label:label_type,
-        data: {
-            year:number,
-            value: number,
-            rate: number
-        }[]
-    }[]
-};
+const PopulationDataSchema = z.array(
+    z.object({
+            year: z.number(),
+            value: z.number(),
+            rate: z.number()
+    }));
+const PopulationCompositionPerYearSchema = z.object({
+    boundaryYear: z.number(),
+    data: z.array(z.object({
+        label: z.enum(ALL_LABELS),
+        data: PopulationDataSchema,
+    }))
+});
+export type PopulationCompositionPerYear = z.infer<typeof PopulationCompositionPerYearSchema>;
 
-export type PopulationCompositionPerYearResponse = {
-    message: string,
-    result: PopulationCompositionPerYear
-};
+const PopulationCompositionPerYearResponseSchema = z.object({
+    message: z.string(),
+    result: PopulationCompositionPerYearSchema
+});
+export type PopulationCompositionPerYearResponse = z.infer<typeof PopulationCompositionPerYearResponseSchema>;
 
 
 // ! Validation必要?
@@ -44,6 +53,7 @@ export async function fetch_prefectures(){
     });
     const text = await res.text();
     const json:PrefecturesResponse = JSON.parse(text);
+    const result = PrefectureResponseSchema.safeParse(json);
     return json;
 }
 
