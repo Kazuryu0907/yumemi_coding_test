@@ -9,10 +9,13 @@ export type PrefecturesResponse = {
 };
 
 
+export const ALL_LABELS = ["総人口","年少人口","生産年齢人口","老年人口"] as const;
+export type label_tuple = typeof ALL_LABELS;
+export type label_type = label_tuple[number];
 export type PopulationCompositionPerYear = {
     boundaryYear: number,
     data: {
-        label:string,
+        label:label_type,
         data: {
             year:number,
             value: number,
@@ -26,6 +29,12 @@ export type PopulationCompositionPerYearResponse = {
     result: PopulationCompositionPerYear
 };
 
+
+// ! Validation必要?
+/**
+ * prefectures一覧をfetchする
+ * @returns {Promise<PrefecturesResponse>} Responseのjson生データ
+ */
 export async function fetch_prefectures(){
     const url = "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures";
     const res = await fetch(url,{
@@ -38,6 +47,12 @@ export async function fetch_prefectures(){
     return json;
 }
 
+// ! Validation必要?
+/**
+ * prefCodeの人口をfetchする
+ * @param {number} prefCode PrefectureのprefCode属性
+ * @returns {Promise<PopulationCompositionPerYearResponse>} Responseのjson生データ
+ */
 export async function fetch_population(prefCode: number){
     const base_url = "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/population/composition/perYear";
     const url = `${base_url}?prefCode=${prefCode}`
