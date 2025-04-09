@@ -44,7 +44,9 @@ export async function fetch_population(prefCode: number){
     const res = await fetch(url,{
         headers: {
             "X-API-KEY": "8FzX5qLmN3wRtKjH7vCyP9bGdEaU4sYpT6cMfZnJ",
-        }
+        },
+        // * 出生データという特徴から，更新されにくいためBrowserのcacheに任せる．
+        cache: "default",
     });
     const text = await res.text();
     const json:PopulationCompositionPerYearResponse = JSON.parse(text);
