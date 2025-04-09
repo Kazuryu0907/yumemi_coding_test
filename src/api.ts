@@ -48,5 +48,5 @@ export async function fetch_population(prefCode: number){
     });
     const text = await res.text();
     const json:PopulationCompositionPerYearResponse = JSON.parse(text);
-    console.log(json.result);
+    return json;
 }

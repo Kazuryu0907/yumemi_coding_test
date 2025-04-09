@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { fetch_prefectures,Prefecture } from "./api";
-
+import Graph from "./Graph";
+/**
+ * 単一のCheckboxコンポーネント
+ * @property {Prefecture} pref 表示させるチェックボックスに対応するPrefecture
+ * @property {React.ChangeEventHandler<HTMLInputElement>} onChange チェックボックスが変化した時に，親コンポーネントのStateを更新するための関数
+ * @returns {JSX.Element} JSX.Element
+ */
+// 
 function Checkbox(pref:Prefecture, onChange:React.ChangeEventHandler<HTMLInputElement>){
     const id = `checkbox-${pref.prefName}`;
     let label = pref.prefName;
@@ -18,17 +25,31 @@ function Checkbox(pref:Prefecture, onChange:React.ChangeEventHandler<HTMLInputEl
     )
 }
 
+/**
+ * CheckboxのonChange関数を生成する
+ * @param {Prefecture} pref 対応するPrefecture
+ * @param {React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>} set_checked_prefecture_ids 親コンポーネントのStateを更新する関数
+ * @returns {React.ChangeEventHandler<HTMLInputElement>} onChange関数
+ */
+
 function create_checkbox_onChange(pref:Prefecture,set_checked_prefecture_ids:React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>){
     const onChange:React.ChangeEventHandler<HTMLInputElement> = (e) => {
         set_checked_prefecture_ids((prev) => {
-            prev[pref.prefCode] = e.target.checked;
-            return {...prev};
+            prev.set(pref,e.target.checked);
+            // 新しいObjectにしてState更新させる
+            return new Map(prev);
         }
         );
     }
     return onChange;
 }
 
+/**
+ * 4行に整列されたCheckboxをRenderするコンポーネント
+ * @param {Prefecture[]} prefectures Prefectureの配列
+ * @param {React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>} set_checked_prefecture_ids 子コンポーネントに流す，CheckboxのState更新用関数
+ * @returns {JSX.Element} JSX.Element
+ */
 function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>){
     const split_prefectures:Prefecture[][] = [[]];
     for(let i = 0;i < prefectures.length;i++){
@@ -43,7 +64,7 @@ function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:Rea
 
     const split_check_boxes = split_prefectures.map((check_boxes,i) => {
         return(
-            <div key={`checkbox-group-${i}`} onChange={() => console.log("changed")}>
+            <div key={`checkbox-group-${i}`}>
                 <div className="flex">
                     {check_boxes.map(pref => {
                         return(
@@ -63,27 +84,47 @@ function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:Rea
     )
 }
 
-type checked_prefecture_ids_type = Record<number,boolean>;
+// * RecordからMapに変更
+type checked_prefecture_ids_type = Map<Prefecture,boolean>;
 function Yumemi(){
     const [prefectures,set_prefectures] = useState<Prefecture[]>([]);
-    const [checked_prefecture_ids,set_checked_prefecture_ids] = useState<checked_prefecture_ids_type>({});
+    const [checked_prefecture_ids,set_checked_prefecture_ids] = useState<checked_prefecture_ids_type>(new Map());
+    // 初回のみ実行
     useEffect(() => {
+        // ゆめみのAPIを叩き，prefecture一覧取得
         fetch_prefectures().then(json => {
+            // Stateのprefecture更新
             set_prefectures(json.result);
-            const checked_pref_ids:checked_prefecture_ids_type = {};
+            const checked_pref_ids:checked_prefecture_ids_type = new Map();
+            // Stateのchecked_prefecture_ids更新
             json.result.map((pref) => {
-                checked_pref_ids[pref.prefCode] = false;
+                checked_pref_ids.set(pref,false);
             });
+            console.log(checked_pref_ids);
             set_checked_prefecture_ids(checked_pref_ids);
         });
     },[]);
+
+
+    // checkboxが更新された時発火
+    useEffect(() => {
+        const checked_prefectures:Prefecture[] = [];
+        for(const [pref,is_checked] of checked_prefecture_ids){
+            if(is_checked === true)checked_prefectures.push(pref);
+        }
+        if(checked_prefectures.length === 0)return;
+    },[checked_prefecture_ids]);
+
+    // checkされたid:numberだけ取り出す
+    const checked_prefecture_ids_:Prefecture[] = [];
+    checked_prefecture_ids.forEach((is_checked,pre) => {if(is_checked)checked_prefecture_ids_.push(pre)});
     return(
         <div className="mt-10 px-16">
             <div>
                 <a className="border border-black">都道府県</a>
             </div>
-            Hello!
             {AlignedCheckbox(prefectures,set_checked_prefecture_ids)}
+            <Graph prefectures={checked_prefecture_ids_}/>
         </div>
     )
 }
