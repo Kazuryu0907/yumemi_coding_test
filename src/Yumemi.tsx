@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetch_population, fetch_prefectures,Prefecture } from "./api";
+import { fetch_prefectures,Prefecture } from "./api";
 import Graph from "./Graph";
 /**
  * 単一のCheckboxコンポーネント
@@ -113,22 +113,18 @@ function Yumemi(){
             if(is_checked === true)checked_prefectures.push(pref);
         }
         if(checked_prefectures.length === 0)return;
-        fetch_population(checked_prefectures[0].prefCode).then(json => {
-            console.log(json.result);
-            // ここのデータをGraph.tsxに流す
-        });
     },[checked_prefecture_ids]);
 
     // checkされたid:numberだけ取り出す
-    const checked_prefecture_ids_:number[] = [];
-    checked_prefecture_ids.forEach((is_checked,pre) => {if(is_checked)checked_prefecture_ids_.push(pre.prefCode)});
+    const checked_prefecture_ids_:Prefecture[] = [];
+    checked_prefecture_ids.forEach((is_checked,pre) => {if(is_checked)checked_prefecture_ids_.push(pre)});
     return(
         <div className="mt-10 px-16">
             <div>
                 <a className="border border-black">都道府県</a>
             </div>
             {AlignedCheckbox(prefectures,set_checked_prefecture_ids)}
-            <Graph perfCodes={checked_prefecture_ids_}/>
+            <Graph prefectures={checked_prefecture_ids_}/>
         </div>
     )
 }
