@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { fetch_prefectures,Prefecture } from "./api";
+import { fetch_prefectures,label_type,Prefecture, ALL_LABELS } from "./api";
 import Graph from "./Graph";
 /**
  * 単一のCheckboxコンポーネント
- * @property {Prefecture} pref 表示させるチェックボックスに対応するPrefecture
- * @property {React.ChangeEventHandler<HTMLInputElement>} onChange チェックボックスが変化した時に，親コンポーネントのStateを更新するための関数
+ * @param {Prefecture} pref 表示させるチェックボックスに対応するPrefecture
+ * @param {React.ChangeEventHandler<HTMLInputElement>} onChange チェックボックスが変化した時に，親コンポーネントのStateを更新するための関数
  * @returns {JSX.Element} JSX.Element
  */
 // 
@@ -78,53 +78,70 @@ function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:Rea
         )
     })
     return(
-        <div className="">
+        <div>
             {split_check_boxes}
         </div>
     )
 }
 
-// * RecordからMapに変更
+/**
+ * Labelを変更するSelectボタン
+ * @param {label_type} label labelのState
+ * @param {React.Dispatch<React.SetStateAction<label_type>>} set_label labelのStateのset関数
+ * @returns {JSX.Element}
+ */
+function LabelSelect({label,set_label}:{label:label_type,set_label:React.Dispatch<React.SetStateAction<label_type>>}){
+    return(
+        <form className="max-w-sm mx-auto">
+            <select id="labels" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5" onChange={(e) => set_label(e.target.value as label_type)} defaultValue={label}>
+            {ALL_LABELS.map(label => {
+                return(<option key={label}>{label}</option>)
+            })}
+            </select>
+        </form>
+    )
+}
+
 type checked_prefecture_ids_type = Map<Prefecture,boolean>;
 function Yumemi(){
+    // fetchしたprefecture一覧を格納
     const [prefectures,set_prefectures] = useState<Prefecture[]>([]);
+    const [label,set_label] = useState<label_type>('総人口');
+    // {prefecture_id[0]: is_checked[0],...}の繰り返し
     const [checked_prefecture_ids,set_checked_prefecture_ids] = useState<checked_prefecture_ids_type>(new Map());
     // 初回のみ実行
     useEffect(() => {
         // ゆめみのAPIを叩き，prefecture一覧取得
-        fetch_prefectures().then(json => {
+        fetch_prefectures().then(res => {
+            if(!res.success){
+                // fetch Err
+                console.error(res.error);
+                return;
+            }
+            const pref = res.data;
             // Stateのprefecture更新
-            set_prefectures(json.result);
+            set_prefectures(pref.result);
             const checked_pref_ids:checked_prefecture_ids_type = new Map();
             // Stateのchecked_prefecture_ids更新
-            json.result.map((pref) => {
+            pref.result.map((pref) => {
                 checked_pref_ids.set(pref,false);
             });
-            console.log(checked_pref_ids);
             set_checked_prefecture_ids(checked_pref_ids);
         });
     },[]);
 
-
-    // checkboxが更新された時発火
-    useEffect(() => {
-        const checked_prefectures:Prefecture[] = [];
-        for(const [pref,is_checked] of checked_prefecture_ids){
-            if(is_checked === true)checked_prefectures.push(pref);
-        }
-        if(checked_prefectures.length === 0)return;
-    },[checked_prefecture_ids]);
-
-    // checkされたid:numberだけ取り出す
+    // checkされたid:{number}だけ取り出す
     const checked_prefecture_ids_:Prefecture[] = [];
     checked_prefecture_ids.forEach((is_checked,pre) => {if(is_checked)checked_prefecture_ids_.push(pre)});
+
     return(
         <div className="mt-10 px-16">
             <div>
                 <a className="border border-black">都道府県</a>
+                <LabelSelect label={label} set_label={set_label} />
             </div>
             {AlignedCheckbox(prefectures,set_checked_prefecture_ids)}
-            <Graph prefectures={checked_prefecture_ids_}/>
+            <Graph prefectures={checked_prefecture_ids_} label={label}/>
         </div>
     )
 }
