@@ -21,7 +21,7 @@ export type label_type = label_tuple[number];
 const PopulationMonoDataSchema = z.object({
     year: z.number(),
     value: z.number(),
-    rate: z.number()
+    rate: z.number().optional()
 })
 const PopulationDataSchema = z.object({
     label: z.enum(ALL_LABELS),
