@@ -9,7 +9,7 @@ const PrefectureSchema = z.object({
 export type Prefecture = z.infer<typeof PrefectureSchema>;
 
 const PrefectureResponseSchema = z.object({
-    message: z.string(),
+    message: z.string().nullable(),
     result: z.array(PrefectureSchema)
 });
 export type PrefecturesResponse = z.infer<typeof PrefectureResponseSchema>;
@@ -18,23 +18,23 @@ export type PrefecturesResponse = z.infer<typeof PrefectureResponseSchema>;
 export const ALL_LABELS = ["総人口","年少人口","生産年齢人口","老年人口"] as const;
 export type label_tuple = typeof ALL_LABELS;
 export type label_type = label_tuple[number];
-const PopulationDataSchema = z.array(
-    z.object({
-            year: z.number(),
-            value: z.number(),
-            rate: z.number()
-    }));
+const PopulationMonoDataSchema = z.object({
+    year: z.number(),
+    value: z.number(),
+    rate: z.number()
+})
+const PopulationDataSchema = z.object({
+    label: z.enum(ALL_LABELS),
+    data: z.array(PopulationMonoDataSchema),
+});
 const PopulationCompositionPerYearSchema = z.object({
     boundaryYear: z.number(),
-    data: z.array(z.object({
-        label: z.enum(ALL_LABELS),
-        data: PopulationDataSchema,
-    }))
+    data: z.array(PopulationDataSchema)
 });
 export type PopulationCompositionPerYear = z.infer<typeof PopulationCompositionPerYearSchema>;
 
 const PopulationCompositionPerYearResponseSchema = z.object({
-    message: z.string(),
+    message: z.string().nullable(),
     result: PopulationCompositionPerYearSchema
 });
 export type PopulationCompositionPerYearResponse = z.infer<typeof PopulationCompositionPerYearResponseSchema>;

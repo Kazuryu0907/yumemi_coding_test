@@ -113,7 +113,7 @@ function Yumemi(){
     useEffect(() => {
         // ゆめみのAPIを叩き，prefecture一覧取得
         fetch_prefectures().then(res => {
-            if(res.error){
+            if(!res.success){
                 // fetch Err
                 console.error(res.error);
                 return;
