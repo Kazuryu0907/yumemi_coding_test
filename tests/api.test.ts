@@ -1,6 +1,5 @@
-
-import {fetch_population,fetch_prefectures} from "./src/api";
-
+import {fetch_population,fetch_prefectures} from "../src/api";
+import {test,expect} from "@playwright/test";
 
 test("fetch_prefecturesのValidationテスト",async()=>{
     const res = await fetch_prefectures();

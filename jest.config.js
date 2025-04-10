@@ -4,4 +4,5 @@ export default {
   transform: {
     "^.+\.tsx?$": ["ts-jest",{}],
   },
+  preset: "jest-playwright-preset"
 };
