@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as z from "zod";
 
 const PrefectureSchema = z.object({
@@ -42,9 +43,9 @@ export type PopulationCompositionPerYearResponse = z.infer<typeof PopulationComp
 // ! Validation必要?
 /**
  * prefectures一覧をfetchする
- * @returns {Promise<PrefecturesResponse>} Responseのjson生データ
+ * @returns {Promise<z.SafeParseReturnType<PrefecturesResponse,PrefecturesResponse>>} ResponseのzodでsafeParseしたResult
  */
-export async function fetch_prefectures(){
+export async function fetch_prefectures(): Promise<z.SafeParseReturnType<PrefecturesResponse,PrefecturesResponse>>{
     const url = "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures";
     const res = await fetch(url,{
         headers: {
@@ -54,16 +55,17 @@ export async function fetch_prefectures(){
     const text = await res.text();
     const json:PrefecturesResponse = JSON.parse(text);
     const result = PrefectureResponseSchema.safeParse(json);
-    return json;
+    return result;
 }
 
 // ! Validation必要?
 /**
  * prefCodeの人口をfetchする
  * @param {number} prefCode PrefectureのprefCode属性
- * @returns {Promise<PopulationCompositionPerYearResponse>} Responseのjson生データ
+ * @returns {Promise<z.SafeParseReturnType<PopulationCompositionPerYearResponse,PopulationCompositionPerYearResponse>>} Responseのjson生データ
  */
-export async function fetch_population(prefCode: number){
+export type fetch_population_return_type = Promise<z.SafeParseReturnType<PopulationCompositionPerYearResponse,PopulationCompositionPerYearResponse>>;
+export async function fetch_population(prefCode: number): fetch_population_return_type {
     const base_url = "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/population/composition/perYear";
     const url = `${base_url}?prefCode=${prefCode}`
     const res = await fetch(url,{
@@ -75,5 +77,6 @@ export async function fetch_population(prefCode: number){
     });
     const text = await res.text();
     const json:PopulationCompositionPerYearResponse = JSON.parse(text);
-    return json;
+    const result = PopulationCompositionPerYearResponseSchema.safeParse(json);
+    return result;
 }

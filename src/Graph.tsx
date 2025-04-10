@@ -2,7 +2,7 @@ import Highcharts from "highcharts";
 import type {SeriesLineOptions} from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import React,{useEffect,useState, useRef} from "react";
-import { fetch_population, label_type, PopulationCompositionPerYear, PopulationCompositionPerYearResponse, Prefecture } from "./api";
+import { fetch_population, fetch_population_return_type, label_type, PopulationCompositionPerYear, Prefecture } from "./api";
 
 type GraphProps = {
     prefectures: Prefecture[],
@@ -39,14 +39,20 @@ function population_to_plot_data(name:string,population:PopulationCompositionPer
  */
 // 
 const prefectures_to_series = async(prefectures:Prefecture[],label:label_type) => {
-    const promises:Promise<PopulationCompositionPerYearResponse>[] = [];
+    const promises:fetch_population_return_type[] = [];
     prefectures.forEach(pref => {
         const promise = fetch_population(pref.prefCode);
         promises.push(promise);
     });
     const populations = await Promise.all(promises);
     const series:SeriesLineOptions[] = [];
-    populations.forEach((population,index) => {
+    //! 次ここから
+    populations.forEach((res,index) => {
+        if(!res.success){
+            // !fetch error
+            return;
+        }
+        const population = res.data;
         const result = population.result;
         const pref = prefectures[index];
         series.push(population_to_plot_data(pref.prefName,result,label));

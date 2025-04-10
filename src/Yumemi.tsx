@@ -112,12 +112,18 @@ function Yumemi(){
     // 初回のみ実行
     useEffect(() => {
         // ゆめみのAPIを叩き，prefecture一覧取得
-        fetch_prefectures().then(json => {
+        fetch_prefectures().then(res => {
+            if(res.error){
+                // fetch Err
+                console.error(res.error);
+                return;
+            }
+            const pref = res.data;
             // Stateのprefecture更新
-            set_prefectures(json.result);
+            set_prefectures(pref.result);
             const checked_pref_ids:checked_prefecture_ids_type = new Map();
             // Stateのchecked_prefecture_ids更新
-            json.result.map((pref) => {
+            pref.result.map((pref) => {
                 checked_pref_ids.set(pref,false);
             });
             set_checked_prefecture_ids(checked_pref_ids);
