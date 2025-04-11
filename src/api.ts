@@ -40,6 +40,20 @@ const PopulationCompositionPerYearResponseSchema = z.object({
 export type PopulationCompositionPerYearResponse = z.infer<typeof PopulationCompositionPerYearResponseSchema>;
 
 
+/**
+ * zodのsafeParse用に，JSON.parseでエラーを出さないための関数 
+ * @param {string} data JSON.parseするデータ
+ * @returns parseできた場合は，JSON Object．できなかった場合は空Object{}
+ */
+const json_safeParse = (data:string):Object =>{
+    try{
+        const json = JSON.parse(data);
+        return json;
+    }catch(_){
+        return {};
+    }
+}
+
 // ! Validation必要?
 /**
  * prefectures一覧をfetchする
@@ -47,13 +61,15 @@ export type PopulationCompositionPerYearResponse = z.infer<typeof PopulationComp
  */
 export async function fetch_prefectures(): Promise<z.SafeParseReturnType<PrefecturesResponse,PrefecturesResponse>>{
     const url = "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures";
+    // fetchがthrow Errorを起こしうるので囲む
+    // ErrorはzodのsafeParseに吸収させる
     const res = await fetch(url,{
         headers: {
             "X-API-KEY": "8FzX5qLmN3wRtKjH7vCyP9bGdEaU4sYpT6cMfZnJ",
         }
     });
     const text = await res.text();
-    const json:PrefecturesResponse = JSON.parse(text);
+    const json = json_safeParse(text);
     const result = PrefectureResponseSchema.safeParse(json);
     return result;
 }
@@ -68,15 +84,22 @@ export type fetch_population_return_type = Promise<z.SafeParseReturnType<Populat
 export async function fetch_population(prefCode: number): fetch_population_return_type {
     const base_url = "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/population/composition/perYear";
     const url = `${base_url}?prefCode=${prefCode}`
-    const res = await fetch(url,{
-        headers: {
-            "X-API-KEY": "8FzX5qLmN3wRtKjH7vCyP9bGdEaU4sYpT6cMfZnJ",
-        },
-        // * 出生データという特徴から，更新されにくいためBrowserのcacheに任せる．
-        cache: "default",
-    });
-    const text = await res.text();
-    const json:PopulationCompositionPerYearResponse = JSON.parse(text);
+    // fetchがthrow Errorを起こしうるので囲む
+    // ErrorはzodのsafeParseに吸収させる
+    let text;
+    try{
+        const res = await fetch(url,{
+            headers: {
+                "X-API-KEY": "8FzX5qLmN3wRtKjH7vCyP9bGdEaU4sYpT6cMfZnJ",
+            },
+            // * 出生データという特徴から，更新されにくいためBrowserのcacheに任せる．
+            cache: "default",
+        });
+        text = await res.text();
+    }catch(e){
+        text = "";
+    }
+    const json = json_safeParse(text);
     const result = PopulationCompositionPerYearResponseSchema.safeParse(json);
     return result;
 }

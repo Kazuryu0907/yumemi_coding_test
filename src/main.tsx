@@ -6,6 +6,6 @@ import Yumemi from './Yumemi.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Yumemi/>
+      <Yumemi/>
   </StrictMode>,
 )

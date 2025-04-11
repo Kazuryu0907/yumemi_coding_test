@@ -102,6 +102,19 @@ function LabelSelect({label,set_label}:{label:label_type,set_label:React.Dispatc
     )
 }
 
+
+export const ErrorFallBack = ({error}:{error:string}) => {
+    return(
+        <div role="alert" className="p-4 bg-red-200">
+            <div className="text-lg font-bold">
+                <p >エラー発生:</p>
+                <pre>{error}</pre>
+            </div>
+        </div>
+    )
+}
+
+type error_handle_type = {is_error:boolean,message:string};
 type checked_prefecture_ids_type = Map<Prefecture,boolean>;
 function Yumemi(){
     // fetchしたprefecture一覧を格納
@@ -109,6 +122,7 @@ function Yumemi(){
     const [label,set_label] = useState<label_type>('総人口');
     // {prefecture_id[0]: is_checked[0],...}の繰り返し
     const [checked_prefecture_ids,set_checked_prefecture_ids] = useState<checked_prefecture_ids_type>(new Map());
+    const [error,set_error] = useState<error_handle_type>({is_error:false,message:""});
     // 初回のみ実行
     useEffect(() => {
         // ゆめみのAPIを叩き，prefecture一覧取得
@@ -116,6 +130,7 @@ function Yumemi(){
             if(!res.success){
                 // fetch Err
                 console.error(res.error);
+                set_error({is_error:true,message:"prefectures fetch error"});
                 return;
             }
             const pref = res.data;
@@ -134,14 +149,23 @@ function Yumemi(){
     const checked_prefecture_ids_:Prefecture[] = [];
     checked_prefecture_ids.forEach((is_checked,pre) => {if(is_checked)checked_prefecture_ids_.push(pre)});
 
-    return(
-        <div className="mt-10 px-16">
+
+    const NormalComponent = () => {
+        return(
+        <div>
+            {/* {error.is_error && <ErrorFallBack error={error.message}/>} */}
             <div>
                 <a className="border border-black">都道府県</a>
                 <LabelSelect label={label} set_label={set_label} />
             </div>
             {AlignedCheckbox(prefectures,set_checked_prefecture_ids)}
             <Graph prefectures={checked_prefecture_ids_} label={label}/>
+        </div>
+        )
+    }
+    return(
+        <div className="mt-10 px-16">
+            {error.is_error ? <ErrorFallBack error={error.message}/> : <NormalComponent/>} 
         </div>
     )
 }
