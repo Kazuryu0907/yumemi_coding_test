@@ -4,5 +4,6 @@ export default {
   transform: {
     "^.+\.tsx?$": ["ts-jest",{}],
   },
-  preset: "jest-playwright-preset"
+  preset: "jest-playwright-preset",
+  testMatch: ["**/tests/*.test.js","**/tests/*.test.ts"],
 };
