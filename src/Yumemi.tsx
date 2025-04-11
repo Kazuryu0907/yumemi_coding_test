@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetch_prefectures,label_type,Prefecture, ALL_LABELS } from "./api";
 import Graph from "./Graph";
+import { ErrorFallBack } from "./components/Error";
 /**
  * 単一のCheckboxコンポーネント
  * @param {Prefecture} pref 表示させるチェックボックスに対応するPrefecture
@@ -103,16 +104,6 @@ function LabelSelect({label,set_label}:{label:label_type,set_label:React.Dispatc
 }
 
 
-export const ErrorFallBack = ({error}:{error:string}) => {
-    return(
-        <div role="alert" className="p-4 bg-red-200">
-            <div className="text-lg font-bold">
-                <p >エラー発生:</p>
-                <pre>{error}</pre>
-            </div>
-        </div>
-    )
-}
 
 type error_handle_type = {is_error:boolean,message:string};
 type checked_prefecture_ids_type = Map<Prefecture,boolean>;

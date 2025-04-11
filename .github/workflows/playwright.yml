@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: Playwright&Jest Tests
 on:
   push:
     branches: [ main, master ]
@@ -20,6 +20,8 @@ jobs:
       run: bunx playwright install --with-deps
     - name: Run Playwright tests
       run: bunx playwright test
+    - name: Run Jest tests
+      run: bun run test
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

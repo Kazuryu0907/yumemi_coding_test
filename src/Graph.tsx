@@ -88,7 +88,7 @@ const Graph:React.FC<GraphProps> = ({prefectures,label}:GraphProps) => {
         series: series
     };
     return (
-        <div>
+        <div data-testid={"graph"}>
             <HighchartsReact
                 highcharts={Highcharts}
                 options={options}
