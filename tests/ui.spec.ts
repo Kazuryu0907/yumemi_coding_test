@@ -9,6 +9,46 @@ test("アクセスできるか",async({page})=>{
 
 test("CheckBoxが存在してるか",async({page})=>{
     await page.goto(url);
-    const checkbox = page.getByText("北海道");
+    await page.waitForResponse((res) => res.url() === "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures");
+    const checkbox = await page.$("#checkbox-北海道");
     expect(checkbox).toBeTruthy();
 });
+
+test("prefecturesがfetchできなかったとき，エラーは出るか",async({page},testInfo)=>{
+    await page.route("https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures",async (route) =>{
+        await route.fulfill({
+            status: 403,
+            contentType: "application/json; charset=UTF-8",
+            body: "Forbidden",
+        });
+    });
+    await page.goto(url);
+    await page.waitForResponse((res) => res.url() === "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures");
+    const error_text = page.getByText("prefectures fetch error");
+    const screenshot = await page.screenshot();
+    testInfo.attach("Screen",{
+        body: screenshot,
+        contentType: "image/png"
+    });
+    expect(error_text).toBeTruthy();
+
+});
+
+// const sleep = msec => new Promise(resolve => setTimeout(resolve,msec));
+// test("checkBoxを押すと，UIが変化するか",async({page},testInfo)=>{
+//     await page.goto(url);
+//     const graph = page.getByTestId("graph");
+//     await page.waitForResponse((res) => res.url() === "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures");
+//     const empty_graph_text = await graph.innerHTML();
+//     // await page.click("input#checkbox-北海道");
+//     const checkbox = page.getByRole("checkbox",{name:"北海道"});
+//     await checkbox.click();
+//     await sleep(3000);
+//     const ploted_graph_text = await graph.innerHTML();
+//     const screenshot = await page.screenshot();
+//     testInfo.attach("Screen",{
+//         body: screenshot,
+//         contentType: "image/png"
+//     });
+//     expect(empty_graph_text === ploted_graph_text).toBe(false);
+// });
