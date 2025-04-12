@@ -52,35 +52,22 @@ function create_checkbox_onChange(pref:Prefecture,set_checked_prefecture_ids:Rea
  * @returns {JSX.Element} JSX.Element
  */
 function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>){
-    const split_prefectures:Prefecture[][] = [[]];
-    for(let i = 0;i < prefectures.length;i++){
-        // 4つごとに分割
-        const index = i % 4;
-        if(index == 0){
-            split_prefectures.push([]);
-        }
-        const j = Math.floor(i / 4);
-        split_prefectures[j][index] = prefectures[i];
-    }
-
-    const split_check_boxes = split_prefectures.map((check_boxes,i) => {
+    const boxes = prefectures.map((pref) =>{
         return(
-            <div key={`checkbox-group-${i}`}>
-                <div className="flex">
-                    {check_boxes.map(pref => {
-                        return(
-                            <div className="mx-3" key={pref.prefName}>
-                                {Checkbox(pref,create_checkbox_onChange(pref,set_checked_prefecture_ids))}
-                            </div>
-                        )
-                    })}
-                </div>
+            <div className="mx-auto" key={pref.prefName}>
+                {Checkbox(pref,create_checkbox_onChange(pref,set_checked_prefecture_ids))}
             </div>
-        )
+        );
     })
+
     return(
         <div>
-            {split_check_boxes}
+            <div className="flex">
+                <a className="text-center px-2 mx-auto border rounded-sm border-black my-auto">都道府県</a>
+            </div>
+            <div className="mt-2 grid grid-cols-3 sm:grid-cols-4">
+                {boxes}
+            </div>
         </div>
     )
 }
@@ -94,7 +81,7 @@ function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:Rea
 function LabelSelect({label,set_label}:{label:label_type,set_label:React.Dispatch<React.SetStateAction<label_type>>}){
     return(
         <form className="max-w-sm mx-auto">
-            <select id="labels" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5" onChange={(e) => set_label(e.target.value as label_type)} defaultValue={label}>
+            <select id="labels" className="bg-gray-50  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5" onChange={(e) => set_label(e.target.value as label_type)} defaultValue={label}>
             {ALL_LABELS.map(label => {
                 return(<option key={label}>{label}</option>)
             })}
@@ -142,17 +129,17 @@ function Yumemi(){
 
 
     return(
-        <div className="mt-10 px-16">
+        <div className="mt-3">
+            <h1 className="text-center font-bold text-xl">ゆめみ Coding Test</h1>
             {/* {error.is_error ? <ErrorFallBack error={error.message}/> : <NormalComponent/>}  */}
             {/* <NormalComponent></NormalComponent> */}
             {error.is_error && <ErrorFallBack error={error.message}/>}
             {!error.is_error && (
-            <div>
-                <div>
-                    <a className="border border-black">都道府県</a>
+            <div className="mt-5">
+                {AlignedCheckbox(prefectures,set_checked_prefecture_ids)}
+                <div className="mt-3 flex items-center h-auto">
                     <LabelSelect label={label} set_label={set_label} />
                 </div>
-                {AlignedCheckbox(prefectures,set_checked_prefecture_ids)}
                 <Graph prefectures={checked_prefecture_ids_} label={label}/>
             </div>
             )}
