@@ -54,7 +54,6 @@ const json_safeParse = (data:string):Object =>{
     }
 }
 
-// ! Validation必要?
 /**
  * prefectures一覧をfetchする
  * @returns {Promise<z.SafeParseReturnType<PrefecturesResponse,PrefecturesResponse>>} ResponseのzodでsafeParseしたResult
@@ -74,7 +73,6 @@ export async function fetch_prefectures(): Promise<z.SafeParseReturnType<Prefect
     return result;
 }
 
-// ! Validation必要?
 /**
  * prefCodeの人口をfetchする
  * @param {number} prefCode PrefectureのprefCode属性
