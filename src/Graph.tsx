@@ -3,6 +3,7 @@ import type {SeriesLineOptions} from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import React,{useEffect,useState, useRef} from "react";
 import { fetch_population, fetch_population_return_type, label_type, PopulationCompositionPerYear, Prefecture } from "./api";
+import { error_handle_type, ErrorFallBack } from "./components/Error";
 
 type GraphProps = {
     prefectures: Prefecture[],
@@ -38,7 +39,7 @@ function population_to_plot_data(name:string,population:PopulationCompositionPer
  * @returns {Promise<SeriesLineOptions[]>} 非同期のHighchartsのseriesデータ
  */
 // 
-const prefectures_to_series = async(prefectures:Prefecture[],label:label_type) => {
+const prefectures_to_series = async(prefectures:Prefecture[],label:label_type,set_error:React.Dispatch<React.SetStateAction<error_handle_type>>) => {
     const promises:fetch_population_return_type[] = [];
     prefectures.forEach(pref => {
         const promise = fetch_population(pref.prefCode);
@@ -46,10 +47,10 @@ const prefectures_to_series = async(prefectures:Prefecture[],label:label_type) =
     });
     const populations = await Promise.all(promises);
     const series:SeriesLineOptions[] = [];
-    //! 次ここから
     populations.forEach((res,index) => {
         if(!res.success){
-            // !fetch error
+            // fetch error
+            set_error({is_error:true,message:"population fetch error"});
             return;
         }
         const population = res.data;
@@ -63,9 +64,10 @@ const prefectures_to_series = async(prefectures:Prefecture[],label:label_type) =
 const Graph:React.FC<GraphProps> = ({prefectures,label}:GraphProps) => {
     // plotするseries
     const [series,set_series] = useState<SeriesLineOptions[]>([]);
+    const [error,set_error] = useState<error_handle_type>({is_error:false,message:""});
     useEffect(() => {
         (async () => {
-            const series = await prefectures_to_series(prefectures,label);
+            const series = await prefectures_to_series(prefectures,label,set_error);
             set_series(series);
         })();
     },[prefectures,label]);
@@ -89,11 +91,14 @@ const Graph:React.FC<GraphProps> = ({prefectures,label}:GraphProps) => {
     };
     return (
         <div data-testid={"graph"}>
-            <HighchartsReact
-                highcharts={Highcharts}
-                options={options}
-                ref={chartComponentRef}
-            />
+            {error.is_error && <ErrorFallBack error={error.message}/>}
+            {!error.is_error && (
+                <HighchartsReact
+                    highcharts={Highcharts}
+                    options={options}
+                    ref={chartComponentRef}
+                />
+            )}
         </div>
     )
 }

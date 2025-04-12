@@ -1,4 +1,6 @@
   
+export type error_handle_type = {is_error:boolean,message:string};
+
 export const ErrorFallBack = ({error}:{error:string}) => {
     return(
         <div role="alert" className="p-4 bg-red-200">
