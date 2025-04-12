@@ -64,7 +64,7 @@ export async function fetch_prefectures(): Promise<z.SafeParseReturnType<Prefect
     // ErrorはzodのsafeParseに吸収させる
     const res = await fetch(url,{
         headers: {
-            "X-API-KEY": "8FzX5qLmN3wRtKjH7vCyP9bGdEaU4sYpT6cMfZnJ",
+            "X-API-KEY": import.meta.env.VITE_X_API_KEY
         }
     });
     const text = await res.text();
@@ -88,7 +88,7 @@ export async function fetch_population(prefCode: number): fetch_population_retur
     try{
         const res = await fetch(url,{
             headers: {
-                "X-API-KEY": "8FzX5qLmN3wRtKjH7vCyP9bGdEaU4sYpT6cMfZnJ",
+                "X-API-KEY": import.meta.env.VITE_X_API_KEY
             },
             // * 出生データという特徴から，更新されにくいためBrowserのcacheに任せる．
             cache: "default",
