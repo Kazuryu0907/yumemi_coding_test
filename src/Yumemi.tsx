@@ -65,7 +65,7 @@ function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:Rea
             <div className="flex">
                 <a className="text-center px-2 mx-auto border rounded-sm border-black my-auto">都道府県</a>
             </div>
-            <div className="mt-2 grid grid-cols-3 sm:grid-cols-4">
+            <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 2xl:grid-cols-7">
                 {boxes}
             </div>
         </div>
@@ -81,7 +81,7 @@ function AlignedCheckbox(prefectures:Prefecture[],set_checked_prefecture_ids:Rea
 function LabelSelect({label,set_label}:{label:label_type,set_label:React.Dispatch<React.SetStateAction<label_type>>}){
     return(
         <form className="max-w-sm mx-auto">
-            <select id="labels" className="bg-gray-50  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5" onChange={(e) => set_label(e.target.value as label_type)} defaultValue={label}>
+            <select id="labels" className="bg-gray-50 text-center  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5" onChange={(e) => set_label(e.target.value as label_type)} defaultValue={label}>
             {ALL_LABELS.map(label => {
                 return(<option key={label}>{label}</option>)
             })}
