@@ -34,21 +34,22 @@ test("prefecturesがfetchできなかったとき，エラーは出るか",async
 
 });
 
-// const sleep = msec => new Promise(resolve => setTimeout(resolve,msec));
-// test("checkBoxを押すと，UIが変化するか",async({page},testInfo)=>{
-//     await page.goto(url);
-//     const graph = page.getByTestId("graph");
-//     await page.waitForResponse((res) => res.url() === "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures");
-//     const empty_graph_text = await graph.innerHTML();
-//     // await page.click("input#checkbox-北海道");
-//     const checkbox = page.getByRole("checkbox",{name:"北海道"});
-//     await checkbox.click();
-//     await sleep(3000);
-//     const ploted_graph_text = await graph.innerHTML();
-//     const screenshot = await page.screenshot();
-//     testInfo.attach("Screen",{
-//         body: screenshot,
-//         contentType: "image/png"
-//     });
-//     expect(empty_graph_text === ploted_graph_text).toBe(false);
-// });
+const sleep = msec => new Promise(resolve => setTimeout(resolve,msec));
+test("checkBoxを押すと，UIが変化するか",async({page},testInfo)=>{
+    await page.goto(url);
+    const graph = page.getByTestId("graph");
+    await page.waitForResponse((res) => res.url() === "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures");
+    const empty_graph_text = await graph.innerHTML();
+    // await page.click("input#checkbox-北海道");
+    const checkbox = page.getByRole("checkbox",{name:"北海道"});
+    await checkbox.click();
+    expect(await checkbox.isChecked()).toBe(true);
+    await sleep(3000);
+    const ploted_graph_text = await graph.innerHTML();
+    const screenshot = await page.screenshot();
+    testInfo.attach("Screen",{
+        body: screenshot,
+        contentType: "image/png"
+    });
+    expect(empty_graph_text === ploted_graph_text).toBe(false);
+});

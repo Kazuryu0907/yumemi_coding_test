@@ -156,7 +156,19 @@ function Yumemi(){
     }
     return(
         <div className="mt-10 px-16">
-            {error.is_error ? <ErrorFallBack error={error.message}/> : <NormalComponent/>} 
+            {/* {error.is_error ? <ErrorFallBack error={error.message}/> : <NormalComponent/>}  */}
+            {/* <NormalComponent></NormalComponent> */}
+            {error.is_error && <ErrorFallBack error={error.message}/>}
+            {!error.is_error && (
+            <div>
+                <div>
+                    <a className="border border-black">都道府県</a>
+                    <LabelSelect label={label} set_label={set_label} />
+                </div>
+                {AlignedCheckbox(prefectures,set_checked_prefecture_ids)}
+                <Graph prefectures={checked_prefecture_ids_} label={label}/>
+            </div>
+            )}
         </div>
     )
 }
