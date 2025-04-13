@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import "./input.css";
 import Yumemi from './Yumemi.tsx';
 
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
       <Yumemi/>
