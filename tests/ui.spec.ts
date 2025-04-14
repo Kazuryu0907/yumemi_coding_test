@@ -27,13 +27,13 @@ test("prefecturesがfetchできなかったとき，エラーは出るか", asyn
   await page.waitForResponse((res) =>
     res.url() === "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures"
   );
-  const error_text = page.getByText("prefectures fetch error");
+  const errorText = page.getByText("prefectures fetch error");
   const screenshot = await page.screenshot();
   testInfo.attach("Screen", {
     body: screenshot,
     contentType: "image/png",
   });
-  expect(error_text).toBeTruthy();
+  expect(errorText).toBeTruthy();
 });
 
 test("populationがfetchできなかったとき，エラーは出るか", async ({ page }, testInfo) => {
@@ -54,13 +54,13 @@ test("populationがfetchできなかったとき，エラーは出るか", async
     res.url()
       === "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/population/composition/perYear?prefCode=1"
   );
-  const error_text = page.getByText("population fetch error");
+  const errorText = page.getByText("population fetch error");
   const screenshot = await page.screenshot();
   testInfo.attach("Screen", {
     body: screenshot,
     contentType: "image/png",
   });
-  expect(error_text).toBeTruthy();
+  expect(errorText).toBeTruthy();
 });
 
 const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
@@ -70,17 +70,16 @@ test("checkBoxを押すと，UIが変化するか", async ({ page }, testInfo) =
   await page.waitForResponse((res) =>
     res.url() === "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures"
   );
-  const empty_graph_text = await graph.innerHTML();
-  // await page.click("input#checkbox-北海道");
+  const emptyGraphHtml = await graph.innerHTML();
   const checkbox = page.getByRole("checkbox", { name: "北海道" });
   await checkbox.click();
   expect(await checkbox.isChecked()).toBe(true);
   await sleep(3000);
-  const ploted_graph_text = await graph.innerHTML();
+  const plotedGraphHtml = await graph.innerHTML();
   const screenshot = await page.screenshot();
   testInfo.attach("Screen", {
     body: screenshot,
     contentType: "image/png",
   });
-  expect(empty_graph_text === ploted_graph_text).toBe(false);
+  expect(emptyGraphHtml === plotedGraphHtml).toBe(false);
 });

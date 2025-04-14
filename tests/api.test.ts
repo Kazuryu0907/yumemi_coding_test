@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { fetch_population, fetch_prefectures } from "../src/api";
+import { fetchPopulation, fetchPrefectures } from "../src/api";
 test("env test", () => {
   console.log(process.env.VITE_X_API_KEY);
   expect(process.env.VITE_X_API_KEY).toBeTruthy();
 });
 test("fetch_prefecturesのValidationテスト", async () => {
-  const res = await fetch_prefectures();
+  const res = await fetchPrefectures();
   if (!res.success) {
     console.error(res.error);
   }
@@ -13,7 +14,7 @@ test("fetch_prefecturesのValidationテスト", async () => {
 });
 
 test("fetch_populationのValidationテスト", async () => {
-  const res = await fetch_population(1);
+  const res = await fetchPopulation(1);
   if (!res.success) {
     console.error(res.error);
   }
@@ -35,7 +36,7 @@ describe("fetchのMockテスト", () => {
       };
     };
     (global.fetch as any) = vi.fn().mockImplementation(mockResponse);
-    const res = await fetch_prefectures();
+    const res = await fetchPrefectures();
     expect(res.success).toBe(false);
   });
   test("fetch_populationの200以外のテスト", async () => {
@@ -47,7 +48,7 @@ describe("fetchのMockテスト", () => {
       };
     };
     (global.fetch as any) = vi.fn().mockImplementation(mockResponse);
-    const res = await fetch_population(1);
+    const res = await fetchPopulation(1);
     expect(res.success).toBe(false);
   });
 });
