@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ALL_LABELS, fetch_prefectures, label_type, Prefecture } from "./api";
-import { error_handle_type, ErrorFallBack } from "./components/Error";
+import { ALL_LABELS, fetchPrefectures, LabelType, Prefecture } from "./api";
+import { ErrorFallBack, ErrorHandleType } from "./components/Error";
 import Graph from "./Graph";
 /**
  * 単一のCheckboxコンポーネント
@@ -8,15 +8,14 @@ import Graph from "./Graph";
  * @param {React.ChangeEventHandler<HTMLInputElement>} onChange チェックボックスが変化した時に，親コンポーネントのStateを更新するための関数
  * @returns {JSX.Element} JSX.Element
  */
-//
 function Checkbox(pref: Prefecture, onChange: React.ChangeEventHandler<HTMLInputElement>) {
   const id = `checkbox-${pref.prefName}`;
   let label = pref.prefName;
   // 文字数を揃えるため，4文字未満はblank追加
   // 漢字しか入ってこないので，サロゲートペアは考慮しない
   if (label.length < 4) {
-    const n_blank = 4 - label.length;
-    label = `${label}${"　".repeat(n_blank)}`;
+    const nBlank = 4 - label.length;
+    label = `${label}${"　".repeat(nBlank)}`;
   }
   return (
     <div className="flex items-center">
@@ -34,16 +33,16 @@ function Checkbox(pref: Prefecture, onChange: React.ChangeEventHandler<HTMLInput
 /**
  * CheckboxのonChange関数を生成する
  * @param {Prefecture} pref 対応するPrefecture
- * @param {React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>} set_checked_prefecture_ids 親コンポーネントのStateを更新する関数
+ * @param {React.Dispatch<React.SetStateAction<CheckedPrefectureIdsType>>} setCheckedPrefectureIds 親コンポーネントのStateを更新する関数
  * @returns {React.ChangeEventHandler<HTMLInputElement>} onChange関数
  */
 
-function create_checkbox_onChange(
+function createCheckboxOnChange(
   pref: Prefecture,
-  set_checked_prefecture_ids: React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>,
+  setCheckedPrefectureIds: React.Dispatch<React.SetStateAction<CheckedPrefectureIdsType>>,
 ) {
   const onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    set_checked_prefecture_ids((prev) => {
+    setCheckedPrefectureIds((prev) => {
       prev.set(pref, e.target.checked);
       // 新しいObjectにしてState更新させる
       return new Map(prev);
@@ -55,17 +54,17 @@ function create_checkbox_onChange(
 /**
  * 4行に整列されたCheckboxをRenderするコンポーネント
  * @param {Prefecture[]} prefectures Prefectureの配列
- * @param {React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>} set_checked_prefecture_ids 子コンポーネントに流す，CheckboxのState更新用関数
+ * @param {React.Dispatch<React.SetStateAction<CheckedPrefectureIdsType>>} setCheckedPrefectureIds 子コンポーネントに流す，CheckboxのState更新用関数
  * @returns {JSX.Element} JSX.Element
  */
 function AlignedCheckbox(
   prefectures: Prefecture[],
-  set_checked_prefecture_ids: React.Dispatch<React.SetStateAction<checked_prefecture_ids_type>>,
+  setCheckedPrefectureIds: React.Dispatch<React.SetStateAction<CheckedPrefectureIdsType>>,
 ) {
   const boxes = prefectures.map((pref) => {
     return (
       <div className="mx-auto" key={pref.prefName}>
-        {Checkbox(pref, create_checkbox_onChange(pref, set_checked_prefecture_ids))}
+        {Checkbox(pref, createCheckboxOnChange(pref, setCheckedPrefectureIds))}
       </div>
     );
   });
@@ -84,19 +83,19 @@ function AlignedCheckbox(
 
 /**
  * Labelを変更するSelectボタン
- * @param {label_type} label labelのState
- * @param {React.Dispatch<React.SetStateAction<label_type>>} set_label labelのStateのset関数
+ * @param {LabelType} label labelのState
+ * @param {React.Dispatch<React.SetStateAction<LabelType>>} set_label labelのStateのset関数
  * @returns {JSX.Element}
  */
 function LabelSelect(
-  { label, set_label }: { label: label_type; set_label: React.Dispatch<React.SetStateAction<label_type>> },
+  { label, setLabel }: { label: LabelType; setLabel: React.Dispatch<React.SetStateAction<LabelType>> },
 ) {
   return (
     <form className="max-w-sm mx-auto">
       <select
         id="labels"
         className="bg-gray-50 text-center  border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-        onChange={(e) => set_label(e.target.value as label_type)}
+        onChange={(e) => setLabel(e.target.value as LabelType)}
         defaultValue={label}
       >
         {ALL_LABELS.map(label => {
@@ -107,28 +106,28 @@ function LabelSelect(
   );
 }
 
-type checked_prefecture_ids_type = Map<Prefecture, boolean>;
+type CheckedPrefectureIdsType = Map<Prefecture, boolean>;
 function Yumemi() {
   // fetchしたprefecture一覧を格納
   const [prefectures, set_prefectures] = useState<Prefecture[]>([]);
-  const [label, set_label] = useState<label_type>("総人口");
+  const [label, set_label] = useState<LabelType>("総人口");
   // {prefecture_id[0]: is_checked[0],...}の繰り返し
-  const [checked_prefecture_ids, set_checked_prefecture_ids] = useState<checked_prefecture_ids_type>(new Map());
-  const [error, set_error] = useState<error_handle_type>({ is_error: false, message: "" });
+  const [checked_prefecture_ids, set_checked_prefecture_ids] = useState<CheckedPrefectureIdsType>(new Map());
+  const [error, set_error] = useState<ErrorHandleType>({ isError: false, message: "" });
   // 初回のみ実行
   useEffect(() => {
     // ゆめみのAPIを叩き，prefecture一覧取得
-    fetch_prefectures().then(res => {
+    fetchPrefectures().then(res => {
       if (!res.success) {
         // fetch Err
         console.error(res.error);
-        set_error({ is_error: true, message: "prefectures fetch error" });
+        set_error({ isError: true, message: "prefectures fetch error" });
         return;
       }
       const pref = res.data;
       // Stateのprefecture更新
       set_prefectures(pref.result);
-      const checked_pref_ids: checked_prefecture_ids_type = new Map();
+      const checked_pref_ids: CheckedPrefectureIdsType = new Map();
       // Stateのchecked_prefecture_ids更新
       pref.result.map((pref) => {
         checked_pref_ids.set(pref, false);
@@ -148,12 +147,12 @@ function Yumemi() {
       <h1 className="text-center font-bold text-xl">ゆめみ Coding Test</h1>
       {/* {error.is_error ? <ErrorFallBack error={error.message}/> : <NormalComponent/>}  */}
       {/* <NormalComponent></NormalComponent> */}
-      {error.is_error && <ErrorFallBack error={error.message} />}
-      {!error.is_error && (
+      {error.isError && <ErrorFallBack error={error.message} />}
+      {!error.isError && (
         <div className="mt-5">
           {AlignedCheckbox(prefectures, set_checked_prefecture_ids)}
           <div className="mt-3 flex items-center h-auto">
-            <LabelSelect label={label} set_label={set_label} />
+            <LabelSelect label={label} setLabel={set_label} />
           </div>
           <Graph prefectures={checked_prefecture_ids_} label={label} />
         </div>

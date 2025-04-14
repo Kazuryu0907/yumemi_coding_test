@@ -2,13 +2,13 @@ import viteLogo from "/vite.svg";
 import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
-import { fetch_population, fetch_prefectures } from "./api";
+import { fetchPopulation, fetchPrefectures } from "./api";
 
 function App() {
   const [count, setCount] = useState(0);
   useEffect(() => {
-    fetch_prefectures();
-    fetch_population(1);
+    fetchPrefectures();
+    fetchPopulation(1);
   }, []);
 
   return (

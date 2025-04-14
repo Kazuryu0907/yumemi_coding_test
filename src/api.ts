@@ -1,49 +1,49 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as z from "zod";
 
-const PrefectureSchema = z.object({
+const prefectureSchema = z.object({
   prefCode: z.number(),
   prefName: z.string(),
 });
 
-export type Prefecture = z.infer<typeof PrefectureSchema>;
+export type Prefecture = z.infer<typeof prefectureSchema>;
 
-const PrefectureResponseSchema = z.object({
+const prefectureResponseSchema = z.object({
   message: z.string().nullable(),
-  result: z.array(PrefectureSchema),
+  result: z.array(prefectureSchema),
 });
-export type PrefecturesResponse = z.infer<typeof PrefectureResponseSchema>;
+export type PrefecturesResponse = z.infer<typeof prefectureResponseSchema>;
 
 export const ALL_LABELS = ["総人口", "年少人口", "生産年齢人口", "老年人口"] as const;
-export type label_tuple = typeof ALL_LABELS;
-export type label_type = label_tuple[number];
-const PopulationMonoDataSchema = z.object({
+export type LabelTuple = typeof ALL_LABELS;
+export type LabelType = LabelTuple[number];
+const populationMonoDataSchema = z.object({
   year: z.number(),
   value: z.number(),
   rate: z.number().optional(),
 });
-const PopulationDataSchema = z.object({
+const populationDataSchema = z.object({
   label: z.enum(ALL_LABELS),
-  data: z.array(PopulationMonoDataSchema),
+  data: z.array(populationMonoDataSchema),
 });
-const PopulationCompositionPerYearSchema = z.object({
+const populationCompositionPerYearSchema = z.object({
   boundaryYear: z.number(),
-  data: z.array(PopulationDataSchema),
+  data: z.array(populationDataSchema),
 });
-export type PopulationCompositionPerYear = z.infer<typeof PopulationCompositionPerYearSchema>;
+export type PopulationCompositionPerYear = z.infer<typeof populationCompositionPerYearSchema>;
 
-const PopulationCompositionPerYearResponseSchema = z.object({
+const populationCompositionPerYearResponseSchema = z.object({
   message: z.string().nullable(),
-  result: PopulationCompositionPerYearSchema,
+  result: populationCompositionPerYearSchema,
 });
-export type PopulationCompositionPerYearResponse = z.infer<typeof PopulationCompositionPerYearResponseSchema>;
+export type PopulationCompositionPerYearResponse = z.infer<typeof populationCompositionPerYearResponseSchema>;
 
 /**
  * zodのsafeParse用に，JSON.parseでエラーを出さないための関数
  * @param {string} data JSON.parseするデータ
  * @returns parseできた場合は，JSON Object．できなかった場合は空Object{}
  */
-const json_safeParse = (data: string): object => {
+const jsonSafeParse = (data: string): object => {
   try {
     const json = JSON.parse(data);
     return json;
@@ -56,18 +56,19 @@ const json_safeParse = (data: string): object => {
  * prefectures一覧をfetchする
  * @returns {Promise<z.SafeParseReturnType<PrefecturesResponse,PrefecturesResponse>>} ResponseのzodでsafeParseしたResult
  */
-export async function fetch_prefectures(): Promise<z.SafeParseReturnType<PrefecturesResponse, PrefecturesResponse>> {
+export async function fetchPrefectures(): Promise<z.SafeParseReturnType<PrefecturesResponse, PrefecturesResponse>> {
   const url = "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/prefectures";
   // fetchがthrow Errorを起こしうるので囲む
   // ErrorはzodのsafeParseに吸収させる
   const res = await fetch(url, {
     headers: {
+      // eslint-disable-next-line
       "X-API-KEY": import.meta.env.VITE_X_API_KEY,
     },
   });
   const text = await res.text();
-  const json = json_safeParse(text);
-  const result = PrefectureResponseSchema.safeParse(json);
+  const json = jsonSafeParse(text);
+  const result = prefectureResponseSchema.safeParse(json);
   return result;
 }
 
@@ -76,18 +77,19 @@ export async function fetch_prefectures(): Promise<z.SafeParseReturnType<Prefect
  * @param {number} prefCode PrefectureのprefCode属性
  * @returns {Promise<z.SafeParseReturnType<PopulationCompositionPerYearResponse,PopulationCompositionPerYearResponse>>} Responseのjson生データ
  */
-export type fetch_population_return_type = Promise<
+export type FetchPopulationReturnType = Promise<
   z.SafeParseReturnType<PopulationCompositionPerYearResponse, PopulationCompositionPerYearResponse>
 >;
-export async function fetch_population(prefCode: number): fetch_population_return_type {
-  const base_url = "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/population/composition/perYear";
-  const url = `${base_url}?prefCode=${prefCode}`;
+export async function fetchPopulation(prefCode: number): FetchPopulationReturnType {
+  const baseUrl = "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/population/composition/perYear";
+  const url = `${baseUrl}?prefCode=${prefCode}`;
   // fetchがthrow Errorを起こしうるので囲む
   // ErrorはzodのsafeParseに吸収させる
   let text;
   try {
     const res = await fetch(url, {
       headers: {
+        // eslint-disable-next-line
         "X-API-KEY": import.meta.env.VITE_X_API_KEY,
       },
       // * 出生データという特徴から，更新されにくいためBrowserのcacheに任せる．
@@ -97,7 +99,7 @@ export async function fetch_population(prefCode: number): fetch_population_retur
   } catch (e) {
     text = "";
   }
-  const json = json_safeParse(text);
-  const result = PopulationCompositionPerYearResponseSchema.safeParse(json);
+  const json = jsonSafeParse(text);
+  const result = populationCompositionPerYearResponseSchema.safeParse(json);
   return result;
 }
