@@ -45,7 +45,7 @@ export type PopulationCompositionPerYearResponse = z.infer<typeof PopulationComp
  * @param {string} data JSON.parseするデータ
  * @returns parseできた場合は，JSON Object．できなかった場合は空Object{}
  */
-const json_safeParse = (data:string):Object =>{
+const json_safeParse = (data:string):object =>{
     try{
         const json = JSON.parse(data);
         return json;

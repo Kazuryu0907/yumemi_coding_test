@@ -4,6 +4,8 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+env:
+  VITE_X_API_KEY: ${{secrets.VITE_X_API_KEY}}
 jobs:
   test:
     timeout-minutes: 60
@@ -21,7 +23,7 @@ jobs:
     - name: Run Playwright tests
       run: bunx playwright test
     - name: Run Jest tests
-      run: bunx jest
+      run: bunx vitest
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

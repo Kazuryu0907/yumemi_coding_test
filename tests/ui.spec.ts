@@ -31,7 +31,27 @@ test("prefecturesがfetchできなかったとき，エラーは出るか",async
         contentType: "image/png"
     });
     expect(error_text).toBeTruthy();
+});
 
+test("populationがfetchできなかったとき，エラーは出るか",async({page},testInfo)=>{
+    await page.route("https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/population/composition/perYear?prefCode=1",async(route)=>{
+        await route.fulfill({
+            status: 403,
+            contentType: "application/json; charset=UTF-8",
+            body: "Forbidden"
+        });
+    });
+    await page.goto(url);
+    const checkbox = page.getByRole("checkbox",{name:"北海道"});
+    await checkbox.click();
+    await page.waitForResponse((res) => res.url() === "https://yumemi-frontend-engineer-codecheck-api.vercel.app/api/v1/population/composition/perYear?prefCode=1");
+    const error_text = page.getByText("population fetch error");
+    const screenshot = await page.screenshot();
+    testInfo.attach("Screen",{
+        body: screenshot,
+        contentType: "image/png"
+    });
+    expect(error_text).toBeTruthy();
 });
 
 const sleep = msec => new Promise(resolve => setTimeout(resolve,msec));
@@ -53,3 +73,4 @@ test("checkBoxを押すと，UIが変化するか",async({page},testInfo)=>{
     });
     expect(empty_graph_text === ploted_graph_text).toBe(false);
 });
+

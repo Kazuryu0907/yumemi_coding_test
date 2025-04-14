@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetch_prefectures,label_type,Prefecture, ALL_LABELS } from "./api";
 import Graph from "./Graph";
-import { ErrorFallBack } from "./components/Error";
+import { error_handle_type, ErrorFallBack } from "./components/Error";
 /**
  * 単一のCheckboxコンポーネント
  * @param {Prefecture} pref 表示させるチェックボックスに対応するPrefecture
@@ -92,7 +92,6 @@ function LabelSelect({label,set_label}:{label:label_type,set_label:React.Dispatc
 
 
 
-type error_handle_type = {is_error:boolean,message:string};
 type checked_prefecture_ids_type = Map<Prefecture,boolean>;
 function Yumemi(){
     // fetchしたprefecture一覧を格納
