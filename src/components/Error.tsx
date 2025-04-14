@@ -1,5 +1,6 @@
-export type error_handle_type = { is_error: boolean; message: string };
+export type ErrorHandleType = { isError: boolean; message: string };
 
+// eslint-disable-next-line
 export const ErrorFallBack = ({ error }: { error: string }) => {
   return (
     <div role="alert" className="p-4 bg-red-200">

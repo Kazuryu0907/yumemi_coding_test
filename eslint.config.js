@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import reactHooks from "eslint-plugin-react-hooks";
+import reactNamingConvention from "eslint-plugin-react-naming-convention";
 import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -16,6 +17,7 @@ export default tseslint.config(
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "react-naming-convention": reactNamingConvention,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -23,6 +25,8 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+      "@typescript-eslint/naming-convention": ["error"],
+      "react-naming-convention/component-name": ["error"],
     },
   },
 );
