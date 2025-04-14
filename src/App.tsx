@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import {fetch_prefectures,fetch_population} from "./api";
+import viteLogo from "/vite.svg";
+import { useEffect, useState } from "react";
+import reactLogo from "./assets/react.svg";
+import "./App.css";
+import { fetch_population, fetch_prefectures } from "./api";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
   useEffect(() => {
     fetch_prefectures();
     fetch_population(1);
-  },[]);
+  }, []);
 
   return (
     <>
@@ -34,7 +34,7 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
