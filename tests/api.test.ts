@@ -1,6 +1,9 @@
 import {fetch_population,fetch_prefectures} from "../src/api";
-// import {test,expect} from "@playwright/test";
-
+import {test,expect,describe,beforeEach,vi} from "vitest";
+test("env test",()=>{
+    console.log(process.env.VITE_X_API_KEY);
+    expect(process.env.VITE_X_API_KEY).toBeTruthy();
+})
 test("fetch_prefecturesのValidationテスト",async()=>{
     const res = await fetch_prefectures();
     if(!res.success){
@@ -20,7 +23,7 @@ test("fetch_populationのValidationテスト",async()=>{
 describe("fetchのMockテスト",() =>{
     // 毎回Mock初期化
     beforeEach(()=>{
-        jest.resetAllMocks();
+        vi.resetAllMocks();
     });
 
     test("fetch_prefeturesの200以外のテスト",async()=>{
@@ -31,7 +34,7 @@ describe("fetchのMockテスト",() =>{
                 text: ()=> "Forbidden",
             }
         }
-        (global.fetch as any) = jest.fn().mockImplementation(mockResponse);
+        (global.fetch as any) = vi.fn().mockImplementation(mockResponse);
         const res = await fetch_prefectures();
         expect(res.success).toBe(false);
     });
@@ -43,7 +46,7 @@ describe("fetchのMockテスト",() =>{
                 text: ()=> "Forbidden",
             }
         }
-        (global.fetch as any) = jest.fn().mockImplementation(mockResponse);
+        (global.fetch as any) = vi.fn().mockImplementation(mockResponse);
         const res = await fetch_population(1);
         expect(res.success).toBe(false);
     });
